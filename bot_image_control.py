@@ -227,11 +227,11 @@ if st.session_state.start_chat:
     if st.session_state.random_variable == 0:
         st.write("Hi! I am ThoughtFlowAI, here to assist you in image generation."
                  " I am an AI model fine-tuned to **optimize efficiency over diversity**."
-                 " I’ll ask you a few simple questions to get a clear idea of what you have in mind. Ready to begin?")
+                 " I’ll ask you a simple question to understand what you have in mind. Ready to begin?")
     else:
         st.write("Hi! I am ThoughtFlowAI, here to assist you in image generation."
                  " I am an AI model fine-tuned to **optimize diversity over efficiency**."
-                 " I’ll ask you a few simple questions to get a clear idea of what you have in mind. Ready to begin?")
+                 " I’ll ask you a simple question to understand what you have in mind. Ready to begin?")
 
     if "openai_model" not in st.session_state:
         st.session_state.openai_model = "gpt-4o-mini"
@@ -256,8 +256,8 @@ if st.session_state.start_chat:
             assistant_id=assistant_id,
             instructions="Play the role of an AI image generation assistant in the context of preventive healthcare. "
             "The first remark from you should be welcoming them and ask whether they are ready. "
-            "Then, ask them to describe their image using specific words. "
-            "Last, provide a summary of user input by using the following phrase 'Here is a summary of your prompts'."
+            "The second remark is to ask them to describe their image. Don't ask any follow-up questions. "
+            "Following user input, provide a summary of user input by using the following phrase 'Here is a summary of your prompts'."
         )
 
         # Waiting for the assistant's run to complete
@@ -324,4 +324,5 @@ if st.session_state.start_chat:
 
 else:
     st.write("Click 'Start Chat' to begin.")
+
 
