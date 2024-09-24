@@ -165,59 +165,57 @@ def generate_image(prompt):
         # Check if the URL is valid
         if image_url and image_url.startswith("http"):
             st.session_state.generated_image_urls.append(image_url)  # Append the valid URL
-            # Automatically save the chat history after generating an image
-            #save_chat_history(st.session_state.messages)
             return image_url
         else:
             st.error("Invalid image URL received from API.")
             return None
-        
-    except openai.error.InvalidRequestError as e:
-        # Handle content policy violation errors specifically
+
+    except openai.error.OpenAIError as e:
+        # Handle content policy violation or other errors
         if 'content_policy_violation' in str(e):
-            st.error("The image generation request was rejected. Please exit chat and start again.")
+            st.error("Your request failed due to a content policy issue. Please try again.")
         else:
-            st.error(f"Error generating image: {str(e)}")
+            st.error(f"An error occurred while generating the image: {e}")
         return None
-        
+
     except Exception as e:
-        st.error(f"Error generating image: {str(e)}")
+        st.error(f"Unexpected error: {str(e)}")
         return None  # Return None if there is an error
 
 
 # Function to combine the original summary with the user's feedback and regenerate the image - one chance
-def ask_for_regeneration():
-    # First ask whether the user is satisfied with the image, but only if an image exists
-    if st.session_state.generated_image_urls:
-        satisfied = st.radio("Are you satisfied with the image?", ("Yes", "No"))
+# def ask_for_regeneration():
+#     # First ask whether the user is satisfied with the image, but only if an image exists
+#     if st.session_state.generated_image_urls:
+#         satisfied = st.radio("Are you satisfied with the image?", ("Yes", "No"))
 
-    if satisfied == "Yes":
-        # If they are satisfied, instruct them to save and download the chat
-        st.write("Awesome! Just hit 'Save Chat', wait 10 seconds, and then click 'Download Chat'. Don't forget to upload the chat histroy to Qualtrics.")
-    else:
-        # If not satisfied, ask them for modifications
-        st.write("Let me know what you'd like to modify below.")
-        user_feedback = st.text_input("Your modification:")
+#     if satisfied == "Yes":
+#         # If they are satisfied, instruct them to save and download the chat
+#         st.write("Awesome! Just hit 'Save Chat', wait 10 seconds, and then click 'Download Chat'. Don't forget to upload the chat histroy to Qualtrics.")
+#     else:
+#         # If not satisfied, ask them for modifications
+#         st.write("Let me know what you'd like to modify below.")
+#         user_feedback = st.text_input("Your modification:")
         
-        if user_feedback:
-            if st.button("Regenerate Image"):
-                # Regenerate the image using the user's feedback (you'd have the logic to handle this)
-                detailed_summary = generate_summary()
-                new_prompt = f"{detailed_summary} Additionally, {user_feedback}."
-                new_image_url = generate_image(new_prompt)
+#         if user_feedback:
+#             if st.button("Regenerate Image"):
+#                 # Regenerate the image using the user's feedback (you'd have the logic to handle this)
+#                 detailed_summary = generate_summary()
+#                 new_prompt = f"{detailed_summary} Additionally, {user_feedback}."
+#                 new_image_url = generate_image(new_prompt)
 
-                if new_image_url and new_image_url not in st.session_state.generated_image_urls:
-                    st.session_state.generated_image_urls.append(new_image_url)
-                    # Automatically save the chat history after generating an image
-                    #save_chat_history(st.session_state.messages)
+#                 if new_image_url and new_image_url not in st.session_state.generated_image_urls:
+#                     st.session_state.generated_image_urls.append(new_image_url)
+#                     # Automatically save the chat history after generating an image
+#                     #save_chat_history(st.session_state.messages)
                 
-                st.image(new_image_url, caption="Re-generated Image")
+#                 st.image(new_image_url, caption="Re-generated Image")
 
-                # Set the flag to prevent the form from showing again
-                st.session_state.image_regenerated = True
+#                 # Set the flag to prevent the form from showing again
+#                 st.session_state.image_regenerated = True
 
-                # Provide instructions to save the chat after regeneration
-                st.write("To save the chat and images, hit 'Save Chat', wait 10 seconds, and then go ahead and click 'Download Chat'. Please upload the chat histroy to Qualtrics.")
+#                 # Provide instructions to save the chat after regeneration
+#                 st.write("To save the chat and images, hit 'Save Chat', wait 10 seconds, and then go ahead and click 'Download Chat'. Please upload the chat histroy to Qualtrics.")
 
 #######################################################Conversation starts########################################################
 if st.session_state.start_chat:
@@ -227,11 +225,11 @@ if st.session_state.start_chat:
     if st.session_state.random_variable == 0:
         st.write("Hi! I am ThoughtFlowAI, here to assist you in image generation."
                  " I am an AI model fine-tuned to **optimize efficiency over diversity**."
-                 " I’ll ask you a simple question to understand what you have in mind. Ready to begin?")
+                 " I’ll ask you a simple question to understand what you have in mind.")
     else:
         st.write("Hi! I am ThoughtFlowAI, here to assist you in image generation."
                  " I am an AI model fine-tuned to **optimize diversity over efficiency**."
-                 " I’ll ask you a simple question to understand what you have in mind. Ready to begin?")
+                 " I’ll ask you a simple question to understand what you have in mind.")
 
     if "openai_model" not in st.session_state:
         st.session_state.openai_model = "gpt-4o-mini"
@@ -313,16 +311,15 @@ if st.session_state.start_chat:
             st.image(st.session_state.generated_image_urls[0], caption="Generated Image")
 
         # If there are more images (re-generated ones), display them as "Re-generated Image"
-        if len(st.session_state.generated_image_urls) > 1:
-            for idx, image_url in enumerate(st.session_state.generated_image_urls[1:], start=1):
-                st.image(image_url, caption=f"Re-generated Image {idx}")
+        # if len(st.session_state.generated_image_urls) > 1:
+        #     for idx, image_url in enumerate(st.session_state.generated_image_urls[1:], start=1):
+        #         st.image(image_url, caption=f"Re-generated Image {idx}")
 
-        time.sleep(5)
-
-        # Call the function to ask for changes and regenerate the image
-        ask_for_regeneration()
-
+            # Provide instructions to save the chat after regeneration
+            st.write("To save the chat and images, hit 'Save Chat', wait 10 seconds, and then go ahead and click 'Download Chat'. Please upload the chat histroy to Qualtrics.")
+        
 else:
     st.write("Click 'Start Chat' to begin.")
+
 
 
