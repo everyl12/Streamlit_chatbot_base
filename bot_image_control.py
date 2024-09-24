@@ -316,8 +316,8 @@ if st.session_state.start_chat:
         #         st.image(image_url, caption=f"Re-generated Image {idx}")
 
             # Provide instructions to save the chat after regeneration
-            st.write("To save the chat and images, hit 'Save Chat', wait 10 seconds, and then go ahead and click 'Download Chat'. Please upload the chat histroy to Qualtrics.")
-        
+            st.write("Now click 'Save Chat', wait 10 seconds, and then go ahead and click 'Download Chat'. Please upload the file to Qualtrics.")
+
 else:
     st.write("Click 'Start Chat' to begin.")
 
