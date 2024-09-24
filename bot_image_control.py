@@ -187,8 +187,9 @@ def generate_image(prompt):
 
 # Function to combine the original summary with the user's feedback and regenerate the image - one chance
 def ask_for_regeneration():
-    # First ask whether the user is satisfied with the image
-    satisfied = st.radio("Are you satisfied with the image?", ("Yes", "No"))
+    # First ask whether the user is satisfied with the image, but only if an image exists
+    if st.session_state.generated_image_urls:
+        satisfied = st.radio("Are you satisfied with the image?", ("Yes", "No"))
 
     if satisfied == "Yes":
         # If they are satisfied, instruct them to save and download the chat
@@ -323,3 +324,4 @@ if st.session_state.start_chat:
 
 else:
     st.write("Click 'Start Chat' to begin.")
+
