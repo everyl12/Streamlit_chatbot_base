@@ -125,9 +125,15 @@ def generate_summary():
         thread_id=st.session_state.thread_id,
         assistant_id=assistant_id,
         instructions=(
-            "Please summarize the conversation in an appropriate, detailed prompt for generating an image that promotes preventive healthcare services (e.g., routine check-ups, vaccinations, or sexual health screenings)."
-            "Ensure to include context and details for each aspect the user provided. For example, instead of just 'adult,' describe it as 'an Asian adult patient smiling during a healthcare check-up with a doctor.' "
-            "Make sure the summary is coherent and suitable for generating a healthcare-related image while adhering to safety guidelines."
+            # "Please summarize the conversation in an appropriate, detailed prompt for generating an image that promotes preventive healthcare services (e.g., routine check-ups, vaccinations, or sexual health screenings)."
+            # "Ensure to include context and details for each aspect the user provided. For example, instead of just 'adult,' describe it as 'an Asian adult patient smiling during a healthcare check-up with a doctor.' "
+            # "Make sure the summary is coherent and suitable for generating a healthcare-related image while adhering to safety guidelines."
+            "Please summarize the conversation in a detailed, appropriate, and descriptive prompt for generating an image that encourages LGBTQ+ communities"
+            "to utilize preventive healthcare services (e.g., routine check-ups, vaccinations, or sexual health screenings). "
+            "Ensure to include context and details for each aspect the user provided, such as the patient's gender identity, sexual orientation, "
+            "age group, racial or ethnic background, health condition, and how the patient and doctor are interacting. "
+            "For example, instead of just 'Asian,' describe it as 'an Asian adult patient smiling during a healthcare check-up with a doctor.' "
+            "Make sure the summary is in a complete, coherent form ready to be used for generating a healthcare-related image."
         )
     )
 
@@ -170,7 +176,7 @@ def generate_image(prompt):
             st.error("Invalid image URL received from API.")
             return None
 
-    except openai.error.OpenAIError as e:
+    except openai.OpenAIError as e:
         # Handle content policy violation or other errors
         if 'content_policy_violation' in str(e):
             st.error("Your request failed due to a content policy issue. Please try again.")
@@ -288,7 +294,7 @@ if st.session_state.start_chat:
     # Display the summary and check if "a summary of your prompts" is in the messages
     if st.session_state.conversation_started:
         for message in st.session_state.messages:
-            if "a summary of your prompts" in message["content"]:
+            if "a summary of your prompts" in message["content"] or "a summary of your prompt" in message["content"]:
                 st.session_state.conversation_summary = message["content"]  # Assign summary content
                 st.session_state.summary_generated = True
 
@@ -317,9 +323,10 @@ if st.session_state.start_chat:
 
             # Provide instructions to save the chat after regeneration
             st.write("Now click 'Save Chat', wait 10 seconds, and then go ahead and click 'Download Chat'. Please upload the file to Qualtrics.")
-
+        
 else:
     st.write("Click 'Start Chat' to begin.")
+
 
 
 
