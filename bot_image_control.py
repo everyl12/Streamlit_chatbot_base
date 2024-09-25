@@ -176,17 +176,23 @@ def generate_image(prompt):
             st.error("Invalid image URL received from API.")
             return None
 
-    except openai.OpenAIError as e:
-        # Handle content policy violation or other errors
+    except openai.error.BadRequestError as e:
+        # Handle bad requests (e.g., content policy violations)
         if 'content_policy_violation' in str(e):
-            st.error("Your request failed due to a content policy issue. Please try again.")
+            st.error("Failed request due to content policy. Please try again.")
         else:
-            st.error(f"An error occurred while generating the image: {e}")
+            st.error(f"Bad request error: {e}")
+        return None
+
+    except openai.OpenAIError as e:
+        # Handle all other OpenAI-related errors
+        st.error(f"An error occurred with OpenAI API: {e}")
         return None
 
     except Exception as e:
+        # Handle any other unexpected errors
         st.error(f"Unexpected error: {str(e)}")
-        return None  # Return None if there is an error
+        return None
 
 
 # Function to combine the original summary with the user's feedback and regenerate the image - one chance
