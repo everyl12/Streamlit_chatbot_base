@@ -141,8 +141,8 @@ if st.session_state.start_chat:
             instructions="Play the role of an AI image generation assistant in the context of preventive healthcare. The tone should be helpful and personal. Be concise. "
             "The first remark from you should be welcoming them. Gently remind them they just have one chance. Ask gently whether they are ready to proceed. "
             "The second remark should invite the user to describe their image in a unpressed way. Don't ask any follow-up questions. "
-            "After receiving the user's input, thank them and summaarize their prompt."
-            "Ask whether they are statified with their prompts, if not, please revise. Then provide a new summary of the user’s prompts using the following phrase: 'Thanks! Here's an summary of your prompts'."
+            "After receiving the user's input, thank them and summarize their prompt using the following phrase: 'so you want a picture'."
+            "Ask whether they are statified with their prompts, if not, please revise. Then provide a new summary of the user’s prompts using the following phrase: 'Thanks! Here's a final summary of your prompts'."
             "And we'll get started once they click 'Generate Image'."
         )
 
@@ -174,7 +174,7 @@ if st.session_state.start_chat:
     # Display the summary and check if "a summary of your prompts" is in the messages
     if st.session_state.conversation_started:
         for message in st.session_state.messages:
-            if "a summary of your prompts" in message["content"] or "a summary of your prompt" in message["content"]:
+            if "a summary of your prompts" in message["content"] or "summary of your prompt" in message["content"]:
                 st.session_state.conversation_summary = message["content"]  # Assign summary content
                 st.session_state.summary_generated = True
 
