@@ -46,12 +46,11 @@ def generate_summary():
             # "Please summarize the conversation in an appropriate, detailed prompt for generating an image that promotes preventive healthcare services (e.g., routine check-ups, vaccinations, or sexual health screenings)."
             # "Ensure to include context and details for each aspect the user provided. For example, instead of just 'adult,' describe it as 'an Asian adult patient smiling during a healthcare check-up with a doctor.' "
             # "Make sure the summary is coherent and suitable for generating a healthcare-related image while adhering to safety guidelines."
-            "Please summarize the conversation in a detailed, appropriate, and descriptive prompt for generating an image that encourages LGBTQ+ communities"
-            "to utilize preventive healthcare services (e.g., routine check-ups, vaccinations, or sexual health screenings). "
+            "Please summarize the conversation in a detailed, appropriate prompt for generating an image that encourages LGBTQ+ communities to utilize preventive healthcare service."
             "Ensure to include context and details for each aspect the user provided, such as the patient's gender identity, sexual orientation, "
             "age group, racial or ethnic background, health condition, and how the patient and doctor are interacting. "
             "For example, instead of just 'Asian,' describe it as 'an Asian adult patient smiling during a healthcare check-up with a doctor.' "
-            "Make sure the summary is in a complete, coherent form ready to be used for generating a healthcare-related image."
+            "Make sure the summary is in a complete, coherent form ready to be used for generating a healthcare-related image. It should not be too long to exceed the token limit."
         )
     )
 
@@ -79,7 +78,7 @@ def generate_image(prompt):
     try:
         response = openai.images.generate(
             model="dall-e-3",
-            prompt=prompt + " Please generate healthcare-related, high-resolution realistic photographs with real humans and details.",
+            prompt=prompt + " Please generate healthcare-related, high-resolution realistic photos with real humans and details. The images should reflect real-world settings, resemble genuine healthcare scenarios, as seen in real photographs.",
             n=1,  # Number of images to generate
             size="1024x1024",  # Image size
             quality="standard"
@@ -142,8 +141,8 @@ if st.session_state.start_chat:
             instructions="Play the role of an AI image generation assistant in the context of preventive healthcare. The tone should be helpful and personal. Be concise. "
             "The first remark from you should be welcoming them. Gently remind them they just have one chance. Ask gently whether they are ready to proceed. "
             "The second remark should invite the user to describe their image in a unpressed way. Don't ask any follow-up questions. "
-            "After receiving the user's input, thank them and summarize their prompt."
-            "Ask whether they are satisfied with their prompts, if not, please revise. Then provide a new summary of the user’s prompts using the following phrase: 'Thanks! Here's an summary of your prompts'."
+            "After receiving the user's input, thank them and summaarize their prompt."
+            "Ask whether they are statified with their prompts, if not, please revise. Then provide a new summary of the user’s prompts using the following phrase: 'Thanks! Here's an summary of your prompts'."
             "And we'll get started once they click 'Generate Image'."
         )
 
@@ -202,9 +201,6 @@ if st.session_state.start_chat:
         
 else:
     st.write("Welcome! Please click 'Start Chat' to begin.")
-
-
-
 
 
 
