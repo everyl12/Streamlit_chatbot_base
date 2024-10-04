@@ -25,47 +25,6 @@ def save_chat_history(chat_history):
     with open(CHAT_HISTORY_PATH, "w") as file:
         json.dump(chat_history, file)
 
-# Extract query parameters from the URL
-#http://192.168.1.90:8501/?RV=1
-# Use st.query_params to get query parameters from the URL
-query_params = st.query_params
-
-# Check if "RV" is in the query parameters
-if "RV" in query_params:
-    # Convert to an integer and set in session state
-    st.session_state.random_variable = int(query_params["RV"][0])
-else:
-    # Generate a random binary variable (0 or 1) if not present in URL
-    if "random_variable" not in st.session_state:
-        st.session_state.random_variable = random.randint(0, 1)
-        
-def create_html_file():
-    html_content = "<html><body>"
-    html_content += "<h1>Chat History</h1>"
-
-    # Iterate through chat messages and escape content for HTML
-    for message in st.session_state.messages:
-        role = message["role"]
-        content = html.escape(message["content"])  # Escape special characters
-        if role == "assistant":
-            html_content += f"<p><strong>Assistant:</strong> {content}</p>"
-        else:
-            html_content += f"<p><strong>User:</strong> {content}</p>"
-
-    # Check if there are any generated image URLs in the list
-    if st.session_state.generated_image_urls:
-        html_content += "<h2>Generated Images</h2>"
-        for idx, image_url in enumerate(st.session_state.generated_image_urls):
-            if image_url and image_url.startswith("http"):
-                html_content += f"<p><strong>Generated Image {idx + 1} URL:</strong> <a href='{image_url}'>{image_url}</a></p>"
-                html_content += f"<img src='{image_url}' alt='Generated Image {idx + 1}' width='300'>"
-    
-    # Add the random variable to the chat history in the downloadable file
-    html_content += f"<p><strong>Random Variable:</strong> {st.session_state.random_variable}</p>"
-
-    html_content += "</body></html>"
-    return html_content
-
 # Initialize session state variables
 if "start_chat" not in st.session_state:
     st.session_state.start_chat = False
@@ -84,40 +43,20 @@ if "summary_generated" not in st.session_state:
 if "image_regenerated" not in st.session_state:
         st.session_state.image_regenerated = False
 
-# Sidebar controls: Start, Exit, and Download
+# Sidebar controls: Start, Clear & Restart
 with st.sidebar:
     if st.button("Start Chat"):
         st.session_state.start_chat = True
         thread = client.beta.threads.create()
         st.session_state.thread_id = thread.id
 
-    if st.button("Exit Chat"):
+    if st.button("Clear & Restart"):
         st.session_state.messages = []  # Clear the chat history
         st.session_state.start_chat = False  # Reset the chat state
         st.session_state.thread_id = None
         st.session_state.conversation_started = False  # Reset conversation tracking
         st.session_state.summary_generated = False  # Reset summary tracking
         st.session_state.generated_image_urls = []
-
-    # Add a Save Chat button
-    if st.button("Save Chat"):
-        # Save the latest chat history to ensure the most recent state is reflected
-        save_chat_history(st.session_state.messages)
-        
-        # Mark that the chat has been saved, so we can show the download button
-        st.session_state.chat_saved = True
-
-        # Introduce an 10-second delay before enabling the Download Chat button
-        time.sleep(10)
-
-    # Show the Download Chat button only after the Save Chat button has been clicked and 8 seconds have passed
-    if st.session_state.get("chat_saved", False):
-        # Generate the latest HTML file for download
-        html_file = create_html_file()
-
-        # Single download button that triggers file download directly
-        st.download_button(label="Download Chat", data=html_file, file_name="chat_history.html", mime="text/html")
-
 
 # Function to generate a detailed, safe conversation summary for DALL-E (used at the backend only)
 def generate_summary():
@@ -194,54 +133,11 @@ def generate_image(prompt):
         st.error(f"Unexpected error: {str(e)}")
         return None
 
-
-# Function to combine the original summary with the user's feedback and regenerate the image - one chance
-# def ask_for_regeneration():
-#     # First ask whether the user is satisfied with the image, but only if an image exists
-#     if st.session_state.generated_image_urls:
-#         satisfied = st.radio("Are you satisfied with the image?", ("Yes", "No"))
-
-#     if satisfied == "Yes":
-#         # If they are satisfied, instruct them to save and download the chat
-#         st.write("Awesome! Just hit 'Save Chat', wait 10 seconds, and then click 'Download Chat'. Don't forget to upload the chat histroy to Qualtrics.")
-#     else:
-#         # If not satisfied, ask them for modifications
-#         st.write("Let me know what you'd like to modify below.")
-#         user_feedback = st.text_input("Your modification:")
-        
-#         if user_feedback:
-#             if st.button("Regenerate Image"):
-#                 # Regenerate the image using the user's feedback (you'd have the logic to handle this)
-#                 detailed_summary = generate_summary()
-#                 new_prompt = f"{detailed_summary} Additionally, {user_feedback}."
-#                 new_image_url = generate_image(new_prompt)
-
-#                 if new_image_url and new_image_url not in st.session_state.generated_image_urls:
-#                     st.session_state.generated_image_urls.append(new_image_url)
-#                     # Automatically save the chat history after generating an image
-#                     #save_chat_history(st.session_state.messages)
-                
-#                 st.image(new_image_url, caption="Re-generated Image")
-
-#                 # Set the flag to prevent the form from showing again
-#                 st.session_state.image_regenerated = True
-
-#                 # Provide instructions to save the chat after regeneration
-#                 st.write("To save the chat and images, hit 'Save Chat', wait 10 seconds, and then go ahead and click 'Download Chat'. Please upload the chat histroy to Qualtrics.")
-
 #######################################################Conversation starts########################################################
 if st.session_state.start_chat:
     st.title("ThoughtFlowAI")
     
-    # Vary the message based on the random binary variable
-    if st.session_state.random_variable == 0:
-        st.write("Hi! I am ThoughtFlowAI, here to assist you in image generation."
-                 " I am an AI model fine-tuned to **optimize efficiency over diversity**."
-                 " I’ll ask you a simple question to understand what you have in mind.")
-    else:
-        st.write("Hi! I am ThoughtFlowAI, here to assist you in image generation."
-                 " I am an AI model fine-tuned to **optimize diversity over efficiency**."
-                 " I’ll ask you a simple question to understand what you have in mind.")
+    st.write("Hi! I am ThoughtFlowAI, here to assist you in image generation.")
 
     if "openai_model" not in st.session_state:
         st.session_state.openai_model = "gpt-4o-mini"
@@ -265,9 +161,9 @@ if st.session_state.start_chat:
             thread_id=st.session_state.thread_id,
             assistant_id=assistant_id,
             instructions="Play the role of an AI image generation assistant in the context of preventive healthcare. "
-            "The first remark from you should be welcoming them and ask whether they are ready. "
-            "The second remark is to ask them to describe their image. Don't ask any follow-up questions. "
-            "Following user input, provide a summary of user input by using the following phrase 'Here is a summary of your prompts'."
+            "The first remark from you should be welcoming them and empathetic, and ask gently whether they are ready to proceed. "
+            "The second remark should invite the user to describe their image in a unpressed way. Gently remind them they just have one chance. Don't ask any follow-up questions. "
+            "After receiving the user's input, provide a summary of the user’s prompts using the following phrase: 'Thank you for sharing. Here's a summary of your prompts, and we'll get started right away.'"
         )
 
         # Waiting for the assistant's run to complete
@@ -322,16 +218,12 @@ if st.session_state.start_chat:
         if st.session_state.generated_image_urls:
             st.image(st.session_state.generated_image_urls[0], caption="Generated Image")
 
-        # If there are more images (re-generated ones), display them as "Re-generated Image"
-        # if len(st.session_state.generated_image_urls) > 1:
-        #     for idx, image_url in enumerate(st.session_state.generated_image_urls[1:], start=1):
-        #         st.image(image_url, caption=f"Re-generated Image {idx}")
-
             # Provide instructions to save the chat after regeneration
-            st.write("Now click 'Save Chat', wait 10 seconds, and then go ahead and click 'Download Chat'. Please upload the file to Qualtrics.")
+            st.write("Thank you! Now please save the image and upload the file to Qualtrics.")
         
 else:
-    st.write("Click 'Start Chat' to begin.")
+    st.write("Welcome! Please click 'Start Chat' to begin.")
+
 
 
 
