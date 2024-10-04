@@ -50,7 +50,7 @@ with st.sidebar:
         thread = client.beta.threads.create()
         st.session_state.thread_id = thread.id
 
-    if st.button("Clear & Restart"):
+    if st.button("Clear Chat"):
         st.session_state.messages = []  # Clear the chat history
         st.session_state.start_chat = False  # Reset the chat state
         st.session_state.thread_id = None
@@ -160,10 +160,10 @@ if st.session_state.start_chat:
         run = client.beta.threads.runs.create(
             thread_id=st.session_state.thread_id,
             assistant_id=assistant_id,
-            instructions="Play the role of an AI image generation assistant in the context of preventive healthcare. "
-            "The first remark from you should be welcoming them and empathetic, and ask gently whether they are ready to proceed. "
-            "The second remark should invite the user to describe their image in a unpressed way. Gently remind them they just have one chance. Don't ask any follow-up questions. "
-            "After receiving the user's input, provide a summary of the user’s prompts using the following phrase: 'Thank you for sharing. Here's a summary of your prompts, and we'll get started right away.'"
+            instructions="Play the role of an AI image generation assistant in the context of preventive healthcare. The tone should be helpful and personal. Be concise. "
+            "The first remark from you should be welcoming them and empathetic. Gently remind them they just have one chance. Ask gently whether they are ready to proceed. "
+            "The second remark should invite the user to describe their image in a unpressed way. Don't ask any follow-up questions. "
+            "After receiving the user's input, provide a summary of the user’s prompts using the following phrase: 'Thank you for sharing. Here's a summary of your prompts'. Tell them we'll get started right away."
         )
 
         # Waiting for the assistant's run to complete
