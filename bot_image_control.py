@@ -12,26 +12,13 @@ assistant_id = "asst_Ck3R41NmsbSM0kDxUYuEVDFf"
 
 client = openai
 
-# Path to save chat history
-CHAT_HISTORY_PATH = "chat_history.json"
-
-def load_chat_history():
-    if os.path.exists(CHAT_HISTORY_PATH):
-        with open(CHAT_HISTORY_PATH, "r") as file:
-            return json.load(file)
-    return []
-
-def save_chat_history(chat_history):
-    with open(CHAT_HISTORY_PATH, "w") as file:
-        json.dump(chat_history, file)
-
 # Initialize session state variables
 if "start_chat" not in st.session_state:
     st.session_state.start_chat = False
 if "thread_id" not in st.session_state:
     st.session_state.thread_id = None
 if "messages" not in st.session_state:
-    st.session_state.messages = load_chat_history()
+    st.session_state.messages = []
 if "conversation_summary" not in st.session_state:
     st.session_state.conversation_summary = None
 if "generated_image_urls" not in st.session_state:
@@ -49,14 +36,6 @@ with st.sidebar:
         st.session_state.start_chat = True
         thread = client.beta.threads.create()
         st.session_state.thread_id = thread.id
-
-    if st.button("Clear Chat"):
-        st.session_state.messages = []  # Clear the chat history
-        st.session_state.start_chat = False  # Reset the chat state
-        st.session_state.thread_id = None
-        st.session_state.conversation_started = False  # Reset conversation tracking
-        st.session_state.summary_generated = False  # Reset summary tracking
-        st.session_state.generated_image_urls = []
 
 # Function to generate a detailed, safe conversation summary for DALL-E (used at the backend only)
 def generate_summary():
@@ -118,7 +97,7 @@ def generate_image(prompt):
     except openai.BadRequestError as e:
         # Handle bad requests (e.g., content policy violations)
         if 'content_policy_violation' in str(e):
-            st.error("Failed request due to content policy. Please try again.")
+            st.error("Failed request due to content policy. Please wait 10 seconds and then click 'Generate Image' to try again.")
         else:
             st.error(f"Bad request error: {e}")
         return None
@@ -161,9 +140,11 @@ if st.session_state.start_chat:
             thread_id=st.session_state.thread_id,
             assistant_id=assistant_id,
             instructions="Play the role of an AI image generation assistant in the context of preventive healthcare. The tone should be helpful and personal. Be concise. "
-            "The first remark from you should be welcoming them and empathetic. Gently remind them they just have one chance. Ask gently whether they are ready to proceed. "
+            "The first remark from you should be welcoming them. Gently remind them they just have one chance. Ask gently whether they are ready to proceed. "
             "The second remark should invite the user to describe their image in a unpressed way. Don't ask any follow-up questions. "
-            "After receiving the user's input, provide a summary of the user’s prompts using the following phrase: 'Thank you for sharing. Here's a summary of your prompts'. Tell them we'll get started right away."
+            "After receiving the user's input, thank them and summaarize their prompt."
+            "Ask whether they are statified with their prompts, if not, please revise. Then provide a new summary of the user’s prompts using the following phrase: 'Thanks! Here's an summary of your prompts'."
+            "And we'll get started once they click 'Generate Image'."
         )
 
         # Waiting for the assistant's run to complete
@@ -191,8 +172,6 @@ if st.session_state.start_chat:
         # Track that the conversation has started
         st.session_state.conversation_started = True
         
-        save_chat_history(st.session_state.messages)  # Save chat history after each interaction
-
     # Display the summary and check if "a summary of your prompts" is in the messages
     if st.session_state.conversation_started:
         for message in st.session_state.messages:
@@ -203,7 +182,7 @@ if st.session_state.start_chat:
     # Display the "Generate Image" button only after the summary
     if st.session_state.summary_generated and st.session_state.conversation_summary is not None:
         if st.button("Generate Image"):
-            st.write("Generating your image, please wait...")
+            st.write("Generating your image, please wait 10-20s...")
 
             detailed_summary = generate_summary()
             new_image_url = generate_image(detailed_summary)
@@ -223,6 +202,7 @@ if st.session_state.start_chat:
         
 else:
     st.write("Welcome! Please click 'Start Chat' to begin.")
+
 
 
 
